@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
       continue;
     if (mapStudents(temp, students)) {
       cerr << "Error: assembling the database" << endl;
+      clearDb(students);
       return 1;
     }
   }
@@ -49,6 +50,7 @@ int main(int argc, char* argv[])
   if (argc > 1) {
     if (cmdArgs(argc, argv, students)) {
       cerr << "Bad shit is going down" << endl;
+      clearDb(students);
       return 1;
     }
   } else
