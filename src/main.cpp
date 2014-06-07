@@ -8,6 +8,12 @@ using namespace std;
 
 int mapStudents(const string& s, map<string, Student*>& m);
 int splitLine(const string& s, const char& c, vector<string>& s_vec);
+int cmdArgs(const int&, char*[], map<string, Student*>& m);
+int output(const string&, map<string, Student*>&);
+void findAverage(const int& indexNum, char* arr[], map<string, Student*>& m);
+void findMatch(const int& indexNum, char* arr[], map<string, Student*>& m);
+
+enum {AVERAGE, MATCH};
 
 int main(int argc, char* argv[])
 {
@@ -32,7 +38,11 @@ int main(int argc, char* argv[])
 
   file.close();
 
-  cout << students["Alex Golubev"]->name() << endl;
+
+  cout << students["Alex Golubev"]->average() << endl;
+  if (argc > 1) 
+    if (cmdArgs(argc, argv, students))
+      return 1;
 
   for (auto& e : students)
     delete e.second;
@@ -53,14 +63,61 @@ int mapStudents(const string& s, map<string, Student*>& m)
 
 int splitLine(const string& s, const char& c, vector<string>& s_vec)
 {
-  int start = 0, end = 0;
+  int start = 0, n = 0, i=0;
 
-  while ((end = s.find(c, start)) != string::npos) {
-    s_vec.emplace_back(s.substr(start, end));
-    start = end + 1;
+  while ((n = s.find(c, start)) != string::npos) {
+    s_vec.emplace_back(s.substr(start, n));
+    cout << s_vec[i] << endl;
+    i++;
+    start = n + 1;
   }
   s_vec.emplace_back(s.substr(start , s.size() - start));
 
   return s_vec.size();
 }
 
+int cmdArgs(const int& indexNum, char* arr[], map<string, Student*>& m)
+{
+  if (indexNum < 3) {
+    cerr << "Comand line argument error" << endl;
+    return 1;
+  }
+  int num; 
+  if ((string)arr[1] == "average") {
+    num = AVERAGE;
+  }
+  else if ((string)arr[1] == "match")
+    num = MATCH;
+  switch (num) {
+    case AVERAGE: findAverage(indexNum, arr, m);
+                  break;
+    case MATCH: findMatch(indexNum, arr, m);
+                  break;
+    default: cout << "Command Line Argument: not found" << endl;
+  }
+  return 0;
+}
+
+int output(const string& s, map<string, Student*>& m)
+{
+  return 0; 
+}
+
+void findAverage(const int& indexNum, char* arr[], map<string, Student*>& m)
+{
+  cout << "Entering findAverage" << endl;
+  for (int i = 2; i < indexNum; i++) {
+    for (map<string, Student*>::iterator e = m.begin(); e != m.end(); e++)
+      if (e->second->name() == (string)arr[i])
+        cout << e->second->average() << endl;
+  }
+}
+
+void findMatch(const int& indexNum, char* arr[], map<string, Student*>& m)
+{
+  for (int i = 2; i < indexNum; i++) {
+    for (map<string, Student*>::iterator e = m.begin(); e != m.end(); e++)
+      if ( e->second->name() == arr[i])
+        e->second->output();
+  }
+}

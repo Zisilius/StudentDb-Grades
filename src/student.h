@@ -23,6 +23,8 @@ public:
   const std::string& comment() const;
   const std::string& date() const;
   const std::string& grades() const;
+  const int average() const;
+  void output() const;
 
 };
 
