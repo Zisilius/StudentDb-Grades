@@ -9,9 +9,17 @@ using namespace std;
 int mapStudents(const string& s, map<string, Student*>& m);
 int splitLine(const string& s, const char& c, vector<string>& s_vec);
 int cmdArgs(const int&, char*[], map<string, Student*>& m);
-int output(const string&, map<string, Student*>&);
-void findAverage(const int& indexNum, char* arr[], map<string, Student*>& m);
-void findMatch(const int& indexNum, char* arr[], map<string, Student*>& m);
+int outputDb(map<string, Student*>&);
+bool findAverage(const int& indexNum, char* arr[], map<string, Student*>& m);
+bool findMatch(const int& indexNum, char* arr[], map<string, Student*>& m);
+template <typename T>
+void clearDb(T& m)
+{
+  for (auto& e : m)
+    delete e.second;
+  cout << "Database successfully cleared" << endl;
+}
+
 
 enum {AVERAGE, MATCH};
 
@@ -38,14 +46,15 @@ int main(int argc, char* argv[])
 
   file.close();
 
-
-  cout << students["Alex Golubev"]->average() << endl;
-  if (argc > 1) 
-    if (cmdArgs(argc, argv, students))
+  if (argc > 1) {
+    if (cmdArgs(argc, argv, students)) {
+      cerr << "Bad shit is going down" << endl;
       return 1;
+    }
+  } else
+    outputDb(students);
 
-  for (auto& e : students)
-    delete e.second;
+  clearDb(students);
 
   return 0;
 }
@@ -63,12 +72,10 @@ int mapStudents(const string& s, map<string, Student*>& m)
 
 int splitLine(const string& s, const char& c, vector<string>& s_vec)
 {
-  int start = 0, n = 0, i=0;
+  int start = 0, n = 0;
 
   while ((n = s.find(c, start)) != string::npos) {
     s_vec.emplace_back(s.substr(start, n - start));
-    cout << s_vec[i] << endl;
-    i++;
     start = n + 1;
   }
   s_vec.emplace_back(s.substr(start , s.size() - start));
@@ -79,45 +86,58 @@ int splitLine(const string& s, const char& c, vector<string>& s_vec)
 int cmdArgs(const int& indexNum, char* arr[], map<string, Student*>& m)
 {
   if (indexNum < 3) {
-    cerr << "Comand line argument error" << endl;
+    cerr << "Command line argument error" << endl;
     return 1;
   }
-  int num; 
-  if ((string)arr[1] == "average") {
-    num = AVERAGE;
-  }
-  else if ((string)arr[1] == "match")
-    num = MATCH;
-  switch (num) {
-    case AVERAGE: findAverage(indexNum, arr, m);
-                  break;
-    case MATCH: findMatch(indexNum, arr, m);
-                  break;
-    default: cout << "Command Line Argument: not found" << endl;
-  }
+
+  map<string, bool (*)(const int&, char*[], map<string, Student*>&)> cmd;
+
+  cmd["--average"] = findAverage;
+  cmd["-a"] = findAverage;
+  cmd["--match"] = findMatch;
+  cmd["-m"] = findMatch;
+
+  if (!cmd[arr[1]](indexNum, arr, m))
+    return 1;
+  
   return 0;
 }
 
-int output(const string& s, map<string, Student*>& m)
+int outputDb( map<string, Student*>& m)
 {
+  for (auto& e : m)
+    e.second->output();
   return 0; 
 }
 
-void findAverage(const int& indexNum, char* arr[], map<string, Student*>& m)
+bool findAverage(const int& indexNum, char* arr[], map<string, Student*>& m)
 {
-  cout << "Entering findAverage" << endl;
-  for (int i = 2; i < indexNum; i++) {
+  bool success = false;
+  string name;
+  for (int i = 2; i < indexNum; i++)
     for (map<string, Student*>::iterator e = m.begin(); e != m.end(); e++)
-      if (e->second->name() == (string)arr[i])
-        cout << e->second->average() << endl;
-  }
+      if (e->second->name() == (string)arr[i]) {
+        // This determines the correct suffics after a person's name
+        if (e->second->name().at(e->second->name().size() - 1) == 's')
+           name = (e->second->name() + '\'');
+        else
+          name = (e->second->name() + "'s");
+        cout << name << " average: " << e->second->average() << endl;
+        success = true;
+        break;
+      }
+  return success;
 }
 
-void findMatch(const int& indexNum, char* arr[], map<string, Student*>& m)
+bool findMatch(const int& indexNum, char* arr[], map<string, Student*>& m)
 {
-  for (int i = 2; i < indexNum; i++) {
+  bool success = false;
+  for (int i = 2; i < indexNum; i++)
     for (map<string, Student*>::iterator e = m.begin(); e != m.end(); e++)
-      if ( e->second->name() == arr[i])
+      if ( e->second->name() == arr[i]) {
         e->second->output();
-  }
+        success = true;
+        break;
+      }
+  return success;
 }

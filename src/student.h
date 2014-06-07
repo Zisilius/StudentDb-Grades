@@ -13,6 +13,10 @@ private:
   std::string _comment;
   std::string _date;
   std::string _grades;
+  float _average;
+  bool _upd_avg;
+
+  void calc_average();
 
 public:
   Student(const std::string& name, const std::string& email,
@@ -23,8 +27,9 @@ public:
   const std::string& comment() const;
   const std::string& date() const;
   const std::string& grades() const;
-  const int average() const;
-  void output() const;
+  void new_grades(std::string);
+  const float& average();
+  void output();
 
 };
 
