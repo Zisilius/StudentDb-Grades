@@ -66,7 +66,7 @@ int splitLine(const string& s, const char& c, vector<string>& s_vec)
   int start = 0, n = 0, i=0;
 
   while ((n = s.find(c, start)) != string::npos) {
-    s_vec.emplace_back(s.substr(start, n));
+    s_vec.emplace_back(s.substr(start, n - start));
     cout << s_vec[i] << endl;
     i++;
     start = n + 1;
