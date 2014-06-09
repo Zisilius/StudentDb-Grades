@@ -7,21 +7,19 @@ using namespace std;
 
 int mapStudents(const string& s, map<string, Student*>& m);
 int splitLine(const string& s, const char& c, vector<string>& s_vec);
-int cmdArgs(const int&, char*[], map<string, Student*>& m);
-int outputDb(map<string, Student*>&);
+int cmdArgs(const int&, char *[], map<string, Student*>& m);
 int findAverage(const int& indexNum, char* arr[], map<string, Student*>& m);
 int findMatch(const int& indexNum, char* arr[], map<string, Student*>& m);
-bool strCmp(const char* a, const char* b);
 int printHelp(const int& i, char* arr[], map<string, Student*>& m);
+void outputDb(map<string, Student*>&);
+void delArr(char *arr[], size_t&& size);
+bool strCmp(const char *a, const char *b);
 template <typename T>
 void clearDb(T& m)
 {
   for (auto& e : m)
     delete e.second;
 }
-
-
-enum {AVERAGE, MATCH};
 
 int main(int argc, char* argv[])
 {
@@ -95,19 +93,22 @@ int cmdArgs(const int& indexNum, char* arr[], map<string, Student*>& m)
   cmd["--help"] = printHelp;
   cmd["-h"] = printHelp;
 
-  if (!cmd[arr[1]](indexNum, arr, m)) {
-    cerr << "Error: Nothing Could Be Matched" << endl;
-    return 1;
+  try {
+    if (!cmd.at(arr[1])(indexNum, arr, m)) {
+      cerr << "Error: Nothing Could Be Matched" << endl;
+      return 1;
+    }
+  } catch (out_of_range e) {
+    cerr << "Error: Such Command Doesn't Exist" << endl;
   }
   
   return 0;
 }
 
-int outputDb(map<string, Student*>& m)
+void outputDb(map<string, Student*>& m)
 {
   for (auto& e : m)
     e.second->output();
-  return 0; 
 }
 
 int findAverage(const int& indexNum, char* arr[], map<string, Student*>& m)
@@ -151,7 +152,7 @@ int findMatch(const int& indexNum, char* arr[], map<string, Student*>& m)
         success++;
         break;
       }
-  if (success < indexNum - 2)
+  if (success < indexNum - 2 && indexNum - 2 != 1)
     cerr << "Error: Only " << success << " People Could Be Matched" << endl;
   return success;
 }
@@ -171,14 +172,14 @@ int printHelp(const int& i, char* arr[], map<string, Student*>& m)
   return true;
 }
 
-bool strCmp(const char* a, const char* b)
+bool strCmp(const char *a, const char *b)
 {
   vector<string> s_vec;
 
   splitLine(a, ' ', s_vec);
-  char* arr1[s_vec.size()];
+  char *arr1[s_vec.size()];
   for(int i = 0; i < s_vec.size(); i++) {
-    arr1[i] = new char[s_vec[i].size() +1];
+    arr1[i] = new char[s_vec[i].size() + 1];
     for (int j = 0; j < s_vec[i].size() + 1; j++) {
       arr1[i][j] = s_vec[i].c_str()[j];
     }
@@ -186,9 +187,9 @@ bool strCmp(const char* a, const char* b)
   s_vec.clear();
 
   splitLine(b, ' ', s_vec);
-  char* arr2[s_vec.size()];
+  char *arr2[s_vec.size()];
   for(int i = 0; i < s_vec.size(); i++) {
-    arr2[i] = new char[s_vec[i].size() +1];
+    arr2[i] = new char[s_vec[i].size() + 1];
     for (int j = 0; j < s_vec[i].size() + 1; j++) {
       arr2[i][j] = s_vec[i].c_str()[j];
     }
@@ -200,24 +201,36 @@ bool strCmp(const char* a, const char* b)
       if (arr1[i][j] == arr2[i][j])
         continue;
       else if (arr1[i][j] > 96 && arr2[i][j] > 96) {
-        if (arr1[i][j] != arr2[i][j])
+        if (arr1[i][j] != arr2[i][j]) {
+          delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
+          delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
           return false;
+        }
       } else if (arr1[i][j] < 97) {
-        if (arr1[i][j] + 32 != arr2[i][j])
+        if (arr1[i][j] + 32 != arr2[i][j]) {
+          delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
+          delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
           return false;
+        }
       } else if (arr2[i][j] < 97) {
-        if (arr2[i][j] + 32 != arr1[i][j])
+        if (arr2[i][j] + 32 != arr1[i][j]) {
+          delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
+          delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
           return false;
+        }
       } else 
-        cout << "Weird shit is happening again" << endl;
+        cout << "Uh hu: we might have a problem" << endl;
     }  
   }
 
-  for (int i = 0; i < sizeof(arr1) / sizeof(arr1[0]); i++)
-    delete[] arr1[i];
-
-  for (int i = 0; i < sizeof(arr2) / sizeof(arr2[0]); i++)
-    delete[] arr2[i];
-
+  delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
+  delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
   return true;
+}
+
+void delArr(char *arr[], size_t&& size) 
+{
+  for (size_t i = 0; i < size; i++) {
+    delete[] arr[i];
+  }
 }
