@@ -5,23 +5,19 @@
 #include <vector>
 using namespace std;
 
-int mapStudents(const string& s, map<string, Student*>& m);
+int mapStudents(const string& s, map<string, Student *>& m);
 int splitLine(const string& s, const char& c, vector<string>& s_vec);
-int cmdArgs(const int&, char *[], map<string, Student*>& m);
-int findAverage(const int& indexNum, char* arr[], map<string, Student*>& m);
-int findMatch(const int& indexNum, char* arr[], map<string, Student*>& m);
-int printHelp(const int& i, char* arr[], map<string, Student*>& m);
-int dirMatch(const int& indexNum, char* arr[], map<string, Student *>& m);
-void outputDb(map<string, Student*>&);
+int cmdArgs(const int&, char *[], const map<string, Student *>& m);
+int findAverage(const int& indexNum, char* arr[], const map<string, Student *>& m);
+int findMatch(const int& indexNum, char* arr[], const map<string, Student *>& m);
+int printHelp(const int& i, char *arr[], const map<string, Student *>& m);
+int dirMatch(const int& indexNum, char *arr[], const map<string, Student *>& m);
+void outputDb(map<string, Student *>&);
 bool strCmp(const char *a, const char *b);
 template <typename T>
-void clearDb(T& m)
-{
-  for (auto& e : m)
-    delete e.second;
-}
+void clearDb(T& m);
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   fstream file("student.db.week2");
   if (!file) {
@@ -29,7 +25,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  map<string, Student*> students;
+  map<string, Student *> students;
 
   string temp;
   while (!file.eof()) {
@@ -50,15 +46,21 @@ int main(int argc, char* argv[])
       clearDb(students);
       return 1;
     }
-  } else
-    outputDb(students);
+  } else outputDb(students);
 
   clearDb(students);
 
   return 0;
 }
 
-int mapStudents(const string& s, map<string, Student*>& m)
+template <typename T>
+void clearDb(T& m)
+{
+  for (auto& e : m)
+    delete e.second;
+}
+
+int mapStudents(const string& s, map<string, Student *>& m)
 {
   vector<string> s_vec;
   
@@ -82,9 +84,9 @@ int splitLine(const string& s, const char& c, vector<string>& s_vec)
   return s_vec.size();
 }
 
-int cmdArgs(const int& indexNum, char* arr[], map<string, Student*>& m)
+int cmdArgs(const int& indexNum, char *arr[], const map<string, Student *>& m)
 {
-  map<string, int (*)(const int&, char*[], map<string, Student*>&)> cmd;
+  map<string, int (*)(const int&, char *[], const map<string, Student *>&)> cmd;
 
   cmd["--average"] = findAverage;
   cmd["-a"] = findAverage;
@@ -96,24 +98,23 @@ int cmdArgs(const int& indexNum, char* arr[], map<string, Student*>& m)
   cmd["-dm"] = dirMatch;
 
   try {
-    if (!cmd.at(arr[1])(indexNum, arr, m)) {
-      cerr << "Error: Nothing Could Be Matched" << endl;
-      return 1;
-    }
+    if (!cmd.at(arr[1])(indexNum, arr, m)) return 1;
   } catch (out_of_range e) {
     cerr << "Error: Such Command Doesn't Exist" << endl;
+    return 1;
   }
   
   return 0;
 }
 
-void outputDb(map<string, Student*>& m)
+void outputDb(map<string, Student *>& m)
 {
   for (auto& e : m)
     e.second->output();
 }
 
-int findAverage(const int& indexNum, char* arr[], map<string, Student*>& m)
+
+int findAverage(const int& indexNum,char *arr[],const map<string, Student *>& m)
 {
   if (indexNum < 3) {
     cerr << "Error: Not Enough Command Line Arguments" << endl;
@@ -123,41 +124,41 @@ int findAverage(const int& indexNum, char* arr[], map<string, Student*>& m)
   int success = 0;
   string name;
   for (int i = 2; i < indexNum; i++)
-    for (map<string, Student*>::iterator e = m.begin(); e != m.end(); e++)
-      if (strCmp(e->second->name().c_str(), arr[i])) {
+    for (auto& e : m)
+      if (strCmp(e.second->name().c_str(), arr[i])) {
         // This determines the correct suffics after a person's name
-        if (e->second->name().at(e->second->name().size() - 1) == 's')
-           name = (e->second->name() + '\'');
+        if (e.second->name().at(e.second->name().size() - 1) == 's')
+           name = (e.second->name() + '\'');
         else
-          name = (e->second->name() + "'s");
-        cout << name << " average: " << e->second->average() << endl;
+          name = (e.second->name() + "'s");
+        cout << name << " average: " << e.second->average() << endl;
         success++;
       }
-  if (success < indexNum - 2)
-    cerr << "Error: Only " << success << " People Could Be Matched" << endl;
-  return success;
+
+  cout << endl << success << " people were matched" << endl;
+  return true;
 }
 
-int findMatch(const int& indexNum, char* arr[], map<string, Student*>& m)
+int findMatch(const int& indexNum, char* arr[], const map<string, Student*>& m)
 {
   if (indexNum < 3) {
     cerr << "Error: Not Enough Command Line Arguments" << endl;
     return false;
   }
 
+  bool first;
   int success = 0;
   for (int i = 2; i < indexNum; i++)
-    for (map<string, Student*>::iterator e = m.begin(); e != m.end(); e++)
-      if (strCmp(e->second->name().c_str(), arr[i])) {
-        e->second->output();
+    for (auto& e : m)
+      if (strCmp(e.second->name().c_str(), arr[i])) {
+        e.second->output();
         success++;
       }
-  if (success < indexNum - 2 && indexNum - 2 != 1)
-    cout << "Only " << success << " People Could Be Matched" << endl;
-  return success;
+  cout << endl << success << " people were matched" << endl;
+  return true;
 }
 
-int dirMatch(const int& indexNum, char* arr[], map<string, Student *>& m)
+int dirMatch(const int& indexNum, char* arr[], const map<string, Student *>& m)
 {
   if (indexNum < 3) {
     cerr << "Error: Not Enough Command Line Arguments" << endl;
@@ -174,7 +175,7 @@ int dirMatch(const int& indexNum, char* arr[], map<string, Student *>& m)
   return true;
 }
 
-int printHelp(const int& i, char* arr[], map<string, Student*>& m)
+int printHelp(const int& i, char* arr[], const map<string, Student*>& m)
 {
   cout << "***** Version 0.02 *****\n"
        << "\nIf used without any command line arguments, the program will"
@@ -191,66 +192,6 @@ int printHelp(const int& i, char* arr[], map<string, Student*>& m)
   return true;
 }
 
-/*
-bool strCmp(const char *a, const char *b)
-{
-
-  splitLine(a, ' ', s_vec);
-  char *arr1[s_vec.size()];
-  for(int i = 0; i < s_vec.size(); i++) {
-    arr1[i] = new char[s_vec[i].size() + 1];
-    for (int j = 0; j < s_vec[i].size() + 1; j++) {
-      arr1[i][j] = s_vec[i].c_str()[j];
-    }
-  }
-  s_vec.clear();
-
-  splitLine(b, ' ', s_vec);
-  char *arr2[s_vec.size()];
-  for(int i = 0; i < s_vec.size(); i++) {
-    arr2[i] = new char[s_vec[i].size() + 1];
-    for (int j = 0; j < s_vec[i].size() + 1; j++) {
-      arr2[i][j] = s_vec[i].c_str()[j];
-    }
-  }
-
-  
-
-
-  for (int i = 0; i < sizeof(arr2) / sizeof(arr2[0]); i++) {
-    for (int j = 0; arr1[i][j] != '\0' && arr2[i][j] != '\0'; j++) {
-      if (arr1[i][j] == arr2[i][j])
-        continue;
-      else if (arr1[i][j] > 96 && arr2[i][j] > 96) {
-        if (arr1[i][j] != arr2[i][j]) {
-          delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
-          delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
-          return false;
-        }
-      } else if (arr1[i][j] < 97) {
-        if (arr1[i][j] + 32 != arr2[i][j]) {
-          delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
-          delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
-          return false;
-        }
-      } else if (arr2[i][j] < 97) {
-        if (arr2[i][j] + 32 != arr1[i][j]) {
-          delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
-          delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
-          return false;
-        }
-      } else 
-        cout << "Uh hu: we might have a problem" << endl;
-    }  
-  }
-
-  delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
-  delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
-  return true;
-  
-}
-*/
-
 bool strCmp(const char *a, const char *b)
 {
   int i;
@@ -262,8 +203,5 @@ bool strCmp(const char *a, const char *b)
       else break;
     if (b[i] == '\0') return true;
   }
-
   return false;
 }
-
-
