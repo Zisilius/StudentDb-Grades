@@ -11,8 +11,8 @@ int cmdArgs(const int&, char *[], map<string, Student*>& m);
 int findAverage(const int& indexNum, char* arr[], map<string, Student*>& m);
 int findMatch(const int& indexNum, char* arr[], map<string, Student*>& m);
 int printHelp(const int& i, char* arr[], map<string, Student*>& m);
+int dirMatch(const int& indexNum, char* arr[], map<string, Student *>& m);
 void outputDb(map<string, Student*>&);
-void delArr(char *arr[], size_t&& size);
 bool strCmp(const char *a, const char *b);
 template <typename T>
 void clearDb(T& m)
@@ -92,6 +92,8 @@ int cmdArgs(const int& indexNum, char* arr[], map<string, Student*>& m)
   cmd["-m"] = findMatch;
   cmd["--help"] = printHelp;
   cmd["-h"] = printHelp;
+  cmd["--dirmatch"] = dirMatch;
+  cmd["-dm"] = dirMatch;
 
   try {
     if (!cmd.at(arr[1])(indexNum, arr, m)) {
@@ -130,7 +132,6 @@ int findAverage(const int& indexNum, char* arr[], map<string, Student*>& m)
           name = (e->second->name() + "'s");
         cout << name << " average: " << e->second->average() << endl;
         success++;
-        break;
       }
   if (success < indexNum - 2)
     cerr << "Error: Only " << success << " People Could Be Matched" << endl;
@@ -150,21 +151,39 @@ int findMatch(const int& indexNum, char* arr[], map<string, Student*>& m)
       if (strCmp(e->second->name().c_str(), arr[i])) {
         e->second->output();
         success++;
-        break;
       }
   if (success < indexNum - 2 && indexNum - 2 != 1)
-    cerr << "Error: Only " << success << " People Could Be Matched" << endl;
+    cout << "Only " << success << " People Could Be Matched" << endl;
   return success;
+}
+
+int dirMatch(const int& indexNum, char* arr[], map<string, Student *>& m)
+{
+  if (indexNum < 3) {
+    cerr << "Error: Not Enough Command Line Arguments" << endl;
+    return false;
+  }
+
+  for (int i = 2; i < indexNum; i++) 
+    try {
+      m.at(arr[i])->output();
+    } catch (out_of_range e) {
+      cout << "No direct match was made for \""
+           << arr[i] << "\""<< endl;
+    }
+  return true;
 }
 
 int printHelp(const int& i, char* arr[], map<string, Student*>& m)
 {
-  cout << "***** Version 0.01 *****\n"
+  cout << "***** Version 0.02 *****\n"
        << "\nIf used without any command line arguments, the program will"
           " assemble the database before outputting it in full."
           "\n\nCommand Line Options:\n\t-m, --match\n\t\t <program name> "
           "-m <names to match>"
           "\n\t\tOutputs the full information for matched students.\n\n\t"
+          "-dm, --dirmatch\n\t\t<program name> -dm <names to match>\n\t\t"
+          "Attempts to match the name at constant time.\n\n\t"
           "-a, --average\n\t\t<program name> -a <names to match>\n\t\t"
           "Outputs the average grade of matched students.\n\n\t-h, --help"
           "\n\t\tPrints out this very helpful text :)\n\n\n"
@@ -172,9 +191,9 @@ int printHelp(const int& i, char* arr[], map<string, Student*>& m)
   return true;
 }
 
+/*
 bool strCmp(const char *a, const char *b)
 {
-  vector<string> s_vec;
 
   splitLine(a, ' ', s_vec);
   char *arr1[s_vec.size()];
@@ -195,9 +214,11 @@ bool strCmp(const char *a, const char *b)
     }
   }
 
+  
+
+
   for (int i = 0; i < sizeof(arr2) / sizeof(arr2[0]); i++) {
     for (int j = 0; arr1[i][j] != '\0' && arr2[i][j] != '\0'; j++) {
-
       if (arr1[i][j] == arr2[i][j])
         continue;
       else if (arr1[i][j] > 96 && arr2[i][j] > 96) {
@@ -226,11 +247,23 @@ bool strCmp(const char *a, const char *b)
   delArr(arr1, sizeof(arr1) / sizeof(arr1[0]));
   delArr(arr2, sizeof(arr2) / sizeof(arr2[0]));
   return true;
+  
+}
+*/
+
+bool strCmp(const char *a, const char *b)
+{
+  int i;
+  for (; a[0] != '\0'; a++) {
+    for (i = 0; b[i] != '\0'; i++)
+      if (b[i] == a[i]) continue;
+      else if (a[i] < 97 && a[i] + 32 == b[i]) continue;
+      else if (b[i] < 97 && b[i] + 32 == a[i]) continue;
+      else break;
+    if (b[i] == '\0') return true;
+  }
+
+  return false;
 }
 
-void delArr(char *arr[], size_t&& size) 
-{
-  for (size_t i = 0; i < size; i++) {
-    delete[] arr[i];
-  }
-}
+
