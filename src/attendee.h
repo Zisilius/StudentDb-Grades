@@ -7,10 +7,10 @@
 class Attendee
 {
 public:
-  virtual ~Attendee() = default;
-  virtual const std::string& name() const = 0;
-  virtual const std::string& email() const = 0;
-  virtual const std::string& comment() const = 0;
+	virtual ~Attendee() = default;
+	virtual const std::string& name() const = 0;
+	virtual const std::string& email() const = 0;
+	virtual const std::string& comment() const = 0;
 
 };
 
