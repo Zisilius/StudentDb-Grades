@@ -5,6 +5,9 @@
 #include <vector>
 using namespace std;
 
+// This will be used to map command-line parameters to functions/commands
+typedef int (*cmd_func)(const int&, char *[], const map<string, Student *>&);
+
 int map_students(const string& s, map<string, Student *>& m);
 int split_line(const string& s, const char& c, vector<string>& s_vec);
 int command_line_interpreter(const int&, char *[],
@@ -61,8 +64,8 @@ int main(int argc, char *argv[])
 template <typename T>
 void clear_database(T& m)
 {
-	for (auto& e : m)
-		delete e.second;
+	for (auto& it : m)
+		delete it.second;
 }
 
 int map_students(const string& s, map<string, Student *>& m)
@@ -92,7 +95,7 @@ int split_line(const string& s, const char& c, vector<string>& v)
 int command_line_interpreter(const int& indexNum, char *arr[],
 		const map<string, Student *>& m)
 {
-	map<string, int (*)(const int&, char *[], const map<string, Student *>&)> cmd;
+	map<string, cmd_func> cmd;
 
 	cmd["--average"] = find_average;
 	cmd["-a"] = find_average;
@@ -116,8 +119,8 @@ int command_line_interpreter(const int& indexNum, char *arr[],
 
 void output_database(const map<string, Student *>& m)
 {
-	for (auto& e : m)
-		e.second->output();
+	for (auto& it : m)
+		it.second->output();
 }
 
 
@@ -130,18 +133,26 @@ int find_average(const int& indexNum, char *arr[],
 	}
 
 	int success = 0;
+	map<string, bool> been_printed;
 	string name;
 
 	for (int i = 2; i < indexNum; i++)
-		for (auto& e : m)
-			if (str_compare(e.second->name().c_str(), arr[i])) {
-				// This determines the correct suffics after a person's name
-				if (e.second->name().at(e.second->name().size() - 1) == 's')
-					name = (e.second->name() + '\'');
+		for (auto& it : m)
+			if (str_compare(it.second->name().c_str(), arr[i])) {
+				// Determines if the name has been matched before
+				try {
+					if (been_printed.at(it.second->name()))
+						continue;
+				} catch (out_of_range e) {
+					been_printed[it.second->name()] = true;
+				}
+				// Determines the correct suffics after a person's name
+				if (it.second->name().at(it.second->name().size() - 1) == 's')
+					name = (it.second->name() + '\'');
 				else
-					name = (e.second->name() + "'s");
+					name = (it.second->name() + "'s");
 
-				cout << name << " average: " << e.second->average() << endl;
+				cout << name << " average: " << it.second->average() << endl;
 				success++;
 			}
 
@@ -158,11 +169,20 @@ int find_match(const int& indexNum, char *arr[],
 	}
 
 	int success = 0;
+	map<string, bool> been_printed;
 
 	for (int i = 2; i < indexNum; i++)
-		for (auto& e : m)
-			if (str_compare(e.second->name().c_str(), arr[i])) {
-				e.second->output();
+		for (auto& it : m)
+			if (str_compare(it.second->name().c_str(), arr[i])) {
+				// Determines if the name has been matched before
+				try {
+					if (been_printed.at(it.second->name()))
+						continue;
+				} catch (out_of_range e) {
+					been_printed[it.second->name()] = true;
+				}
+
+				it.second->output();
 				success++;
 			}
 
@@ -192,17 +212,17 @@ int direct_match(const int& indexNum, char *arr[],
 int print_help(const int& i, char *arr[], const map<string, Student *>& m)
 {
 	cout << "***** Version 0.02 *****\n"
-			"\nIf used without any command line arguments, the program will"
-			" assemble the database before outputting it in full."
-			"\n\nCommand Line Options:\n\t-m, --match\n\t\t <program name> "
-			"-m <names to match>"
-			"\n\t\tOutputs the full information for matched students.\n\n\t"
-			"-dm, --dirmatch\n\t\t<program name> -dm <names to match>\n\t\t"
-			"Attempts to match the name at constant time.\n\n\t"
-			"-a, --average\n\t\t<program name> -a <names to match>\n\t\t"
-			"Outputs the average grade of matched students.\n\n\t-h, --help"
-			"\n\t\tPrints out this very helpful text :)\n\n\n"
-			"Author: Alexey Golubev" << endl;
+		"\nIf used without any command line arguments, the program will"
+		" assemble the database before outputting it in full."
+		"\n\nCommand Line Options:\n\t-m, --match\n\t\t <program name> "
+		"-m <names to match>"
+		"\n\t\tOutputs the full information for matched students.\n\n\t"
+		"-dm, --dirmatch\n\t\t<program name> -dm <names to match>\n\t\t"
+		"Attempts to match the name at constant time.\n\n\t"
+		"-a, --average\n\t\t<program name> -a <names to match>\n\t\t"
+		"Outputs the average grade of matched students.\n\n\t-h, --help"
+		"\n\t\tPrints out this very helpful text :)\n\n\n"
+		"Author: Alexey Golubev" << endl;
 
 	return 0;
 }
