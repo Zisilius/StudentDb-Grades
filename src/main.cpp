@@ -5,20 +5,20 @@
 #include <vector>
 using namespace std;
 
-// This will be used to map command-line parameters to functions/commands
+/* This will be used to map command-line parameters to functions/commands */
 typedef int (*cmd_func)(const int&, char *[], const map<string, Student *>&);
 
 int map_students(const string& s, map<string, Student *>& m);
 int split_line(const string& s, const char& c, vector<string>& s_vec);
 int command_line_interpreter(const int&, char *[],
-		const map<string, Student *>& m);
+                             const map<string, Student *>& m);
 int find_average(const int& indexNum, char *arr[],
-		const map<string, Student *>& m);
+                 const map<string, Student *>& m);
 int find_match(const int& indexNum, char *arr[],
-		const map<string, Student *>& m);
+               const map<string, Student *>& m);
 int print_help(const int& i, char *arr[], const map<string, Student *>& m);
 int direct_match(const int& indexNum, char *arr[],
-		const map<string, Student *>& m);
+                 const map<string, Student *>& m);
 void output_database(const map<string, Student *>&);
 bool str_compare(const char *a, const char *b);
 template <typename T>
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 		cerr << "Error: file couldn't be opened" << endl;
 		return 1;
 	}
-	// The map will serve as a simple database for students
+	/* The map will serve as a simple database for students */
 	map<string, Student *> students;
 	string tmp;
 
@@ -93,7 +93,7 @@ int split_line(const string& s, const char& c, vector<string>& v)
 }
 
 int command_line_interpreter(const int& indexNum, char *arr[],
-		const map<string, Student *>& m)
+                             const map<string, Student *>& m)
 {
 	map<string, cmd_func> cmd;
 
@@ -125,7 +125,7 @@ void output_database(const map<string, Student *>& m)
 
 
 int find_average(const int& indexNum, char *arr[],
-		const map<string, Student *>& m)
+                 const map<string, Student *>& m)
 {
 	if (indexNum < 3) {
 		cerr << "Error: not enough arguments" << endl;
@@ -139,14 +139,14 @@ int find_average(const int& indexNum, char *arr[],
 	for (int i = 2; i < indexNum; i++)
 		for (auto& it : m)
 			if (str_compare(it.second->name().c_str(), arr[i])) {
-				// Determines if the name has been matched before
+				/* Determines if the name has been matched before */
 				try {
 					if (been_printed.at(it.second->name()))
 						continue;
 				} catch (out_of_range e) {
 					been_printed[it.second->name()] = true;
 				}
-				// Determines the correct suffics after a person's name
+				/* Determines the correct suffics after a person's name */
 				if (it.second->name().at(it.second->name().size() - 1) == 's')
 					name = (it.second->name() + '\'');
 				else
@@ -155,13 +155,12 @@ int find_average(const int& indexNum, char *arr[],
 				cout << name << " average: " << it.second->average() << endl;
 				success++;
 			}
-
 	cout << endl << success << " people were matched" << endl;
 	return 0;
 }
 
 int find_match(const int& indexNum, char *arr[],
-		const map<string, Student *>& m)
+               const map<string, Student *>& m)
 {
 	if (indexNum < 3) {
 		cerr << "Error: not enough arguments" << endl;
@@ -174,7 +173,7 @@ int find_match(const int& indexNum, char *arr[],
 	for (int i = 2; i < indexNum; i++)
 		for (auto& it : m)
 			if (str_compare(it.second->name().c_str(), arr[i])) {
-				// Determines if the name has been matched before
+				/* Determines if the name has been matched before */
 				try {
 					if (been_printed.at(it.second->name()))
 						continue;
@@ -185,13 +184,12 @@ int find_match(const int& indexNum, char *arr[],
 				it.second->output();
 				success++;
 			}
-
 	cout << endl << success << " people were matched" << endl;
 	return 0;
 }
 
 int direct_match(const int& indexNum, char *arr[],
-		const map<string, Student *>& m)
+                 const map<string, Student *>& m)
 {
 	if (indexNum < 3) {
 		cerr << "Error: not enough arguments" << endl;
@@ -205,33 +203,30 @@ int direct_match(const int& indexNum, char *arr[],
 			cout << "No direct match was made for \""
 				<< arr[i] << "\""<< endl;
 		}
-
 	return 0;
 }
 
 int print_help(const int& i, char *arr[], const map<string, Student *>& m)
 {
 	cout << "***** Version 0.02 *****\n"
-		"\nIf used without any command line arguments, the program will"
-		" assemble the database before outputting it in full."
-		"\n\nCommand Line Options:\n\t-m, --match\n\t\t <program name> "
-		"-m <names to match>"
-		"\n\t\tOutputs the full information for matched students.\n\n\t"
-		"-dm, --dirmatch\n\t\t<program name> -dm <names to match>\n\t\t"
-		"Attempts to match the name at constant time.\n\n\t"
-		"-a, --average\n\t\t<program name> -a <names to match>\n\t\t"
-		"Outputs the average grade of matched students.\n\n\t-h, --help"
-		"\n\t\tPrints out this very helpful text :)\n\n\n"
-		"Author: Alexey Golubev" << endl;
-
+	        "\nIf used without any command line arguments, the program will"
+	        " assemble the database before outputting it in full."
+	        "\n\nCommand Line Options:\n\t-m, --match\n\t\t <program name> "
+	        "-m <names to match>"
+	        "\n\t\tOutputs the full information for matched students.\n\n\t"
+	        "-dm, --dirmatch\n\t\t<program name> -dm <names to match>\n\t\t"
+	        "Attempts to match the name at constant time.\n\n\t"
+	        "-a, --average\n\t\t<program name> -a <names to match>\n\t\t"
+	        "Outputs the average grade of matched students.\n\n\t-h, --help"
+	        "\n\t\tPrints out this very helpful text :)\n\n\n"
+	        "Author: Alexey Golubev" << endl;
 	return 0;
 }
 
 bool str_compare(const char *a, const char *b)
 {
 	int i;
-
-	for (; a[0] != '\0'; a++) {
+	while (a[0] != '\0') {
 		for (i = 0; b[i] != '\0'; i++)
 			if (b[i] == a[i]) 
 				continue;
@@ -242,7 +237,7 @@ bool str_compare(const char *a, const char *b)
 			else 
 				break;
 		if (b[i] == '\0') return true;
+		a++;
 	}
-
 	return false;
 }

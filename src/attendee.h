@@ -1,12 +1,12 @@
-#ifndef __ATTENDEE__
-#define __ATTENDEE__
+#ifndef __ATTENDEE_H__
+#define __ATTENDEE_H__
 
 #include <iostream>
 #include <string>
 
 class Attendee
 {
-public:
+  public:
 	virtual ~Attendee() = default;
 	virtual const std::string& name() const = 0;
 	virtual const std::string& email() const = 0;
@@ -14,4 +14,4 @@ public:
 
 };
 
-#endif /* __ATTENDEE__ */
+#endif /* __ATTENDEE_H__ */
