@@ -7,19 +7,19 @@
 Student::Student() : name_(""), email_(""), comment_(""), date_(""), grades_()
 { }
 
-Student::Student(const std::string& name, const std::string& email,            
-                 const std::string& comment, const std::string& date, 
+Student::Student(const std::string& name, const std::string& email,
+                 const std::string& comment, const std::string& date,
                  const std::string& grades)
                  : name_(name), email_(email), comment_(comment), date_(date)
 {
 	calc_average(grades);
 }
 
-Student::Student(const std::string& name, const std::string& email,            
-                 const std::string& comment, const std::string& date, 
+Student::Student(const std::string& name, const std::string& email,
+                 const std::string& comment, const std::string& date,
                  const std::vector<int>& grades)
                  : name_(name), email_(email), comment_(comment), date_(date),
-                 grades_(grades) 
+                 grades_(grades)
 {
 	recalc_average();
 }
@@ -31,7 +31,7 @@ const std::string& Student::date() const { return date_; }
 const std::vector<int>& Student::grades() const { return grades_; }
 const float& Student::average() const { return average_; }
 
-void Student::recalc_average() 
+void Student::recalc_average()
 {
 	float tmp;
 	for (int i = 0; i < grades_.size(); i++)
@@ -39,7 +39,7 @@ void Student::recalc_average()
 	average_ = (float) tmp / grades_.size();
 }
 
-void Student::calc_average(const std::string& s) 
+void Student::calc_average(const std::string& s)
 {
 	std::vector<std::string> v;
 	int start = 0, end = 0;
@@ -68,11 +68,11 @@ void Student::calc_average(const std::string& s)
 
 void Student::output() const
 {
-	std::cout << name_ << ":" 
+	std::cout << name_ << ":"
 	          << "\n\temail -> " << email_
-	          << "\n\tcomment -> " << comment_ 
-	          << "\n\tdate -> " << date_ 
-	          << "\n\tgrades -> ";   
+	          << "\n\tcomment -> " << comment_
+	          << "\n\tdate -> " << date_
+	          << "\n\tgrades -> ";
 	for (auto& e : grades_)
 		std::cout << e << ", ";
 	std::cout << "\n\taverage -> " << average() << std::endl;

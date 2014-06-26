@@ -8,8 +8,14 @@ using namespace std;
 /* This will be used to map command-line parameters to functions/commands */
 typedef int (*cmd_func)(const int&, char *[], const map<string, Student *>&);
 
+/* these function are for assembling and operating the database of students */
 int map_students(const string& s, map<string, Student *>& m);
 int split_line(const string& s, const char& c, vector<string>& s_vec);
+void output_database(const map<string, Student *>&);
+template <typename T>
+void clear_database(T& m);
+
+/* these function are for processing the command line input */
 int command_line_interpreter(const int&, char *[],
                              const map<string, Student *>& m);
 int find_average(const int& indexNum, char *arr[],
@@ -19,23 +25,21 @@ int find_match(const int& indexNum, char *arr[],
 int print_help(const int& i, char *arr[], const map<string, Student *>& m);
 int direct_match(const int& indexNum, char *arr[],
                  const map<string, Student *>& m);
-void output_database(const map<string, Student *>&);
+
+/* miscelaneous/all-purpose functions */
 bool str_compare(const char *a, const char *b);
-template <typename T>
-void clear_database(T& m);
+
 
 int main(int argc, char *argv[])
 {
 	fstream file("student.db.week2");
-
-	if (!file) {
+	if (!file.is_open()) {
 		cerr << "Error: file couldn't be opened" << endl;
 		return 1;
 	}
 	/* The map will serve as a simple database for students */
 	map<string, Student *> students;
 	string tmp;
-
 	while (!file.eof()) {
 		getline(file, tmp);
 		if (tmp.size() == 0)
@@ -46,20 +50,22 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-
 	file.close();
 
+	/* command line processing takes over here if there is any */
 	if (argc > 1) {
 		if (command_line_interpreter(argc, argv, students)) {
 			clear_database(students);
 			return 1;
 		}
-	} else
+	} else {
 		output_database(students);
+	}
 
 	clear_database(students);
 	return 0;
 }
+
 
 template <typename T>
 void clear_database(T& m)
@@ -71,7 +77,7 @@ void clear_database(T& m)
 int map_students(const string& s, map<string, Student *>& m)
 {
 	vector<string> v;
-  
+
 	if (split_line(s, ':', v) != 5)
 		return 1;
 
@@ -136,8 +142,8 @@ int find_average(const int& indexNum, char *arr[],
 	map<string, bool> been_printed;
 	string name;
 
-	for (int i = 2; i < indexNum; i++)
-		for (auto& it : m)
+	for (int i = 2; i < indexNum; i++) {
+		for (auto& it : m) {
 			if (str_compare(it.second->name().c_str(), arr[i])) {
 				/* Determines if the name has been matched before */
 				try {
@@ -151,10 +157,11 @@ int find_average(const int& indexNum, char *arr[],
 					name = (it.second->name() + '\'');
 				else
 					name = (it.second->name() + "'s");
-
 				cout << name << " average: " << it.second->average() << endl;
 				success++;
 			}
+		}
+	}
 	cout << endl << success << " people were matched" << endl;
 	return 0;
 }
@@ -170,8 +177,8 @@ int find_match(const int& indexNum, char *arr[],
 	int success = 0;
 	map<string, bool> been_printed;
 
-	for (int i = 2; i < indexNum; i++)
-		for (auto& it : m)
+	for (int i = 2; i < indexNum; i++) {
+		for (auto& it : m) {
 			if (str_compare(it.second->name().c_str(), arr[i])) {
 				/* Determines if the name has been matched before */
 				try {
@@ -180,10 +187,11 @@ int find_match(const int& indexNum, char *arr[],
 				} catch (out_of_range e) {
 					been_printed[it.second->name()] = true;
 				}
-
 				it.second->output();
 				success++;
 			}
+		}
+	}
 	cout << endl << success << " people were matched" << endl;
 	return 0;
 }
@@ -196,12 +204,12 @@ int direct_match(const int& indexNum, char *arr[],
 		return 1;
 	}
 
-	for (int i = 2; i < indexNum; i++) 
+	for (int i = 2; i < indexNum; i++)
 		try {
 			m.at(arr[i])->output();
 		} catch (out_of_range e) {
 			cout << "No direct match was made for \""
-				<< arr[i] << "\""<< endl;
+			     << arr[i] << "\""<< endl;
 		}
 	return 0;
 }
@@ -227,16 +235,18 @@ bool str_compare(const char *a, const char *b)
 {
 	int i;
 	while (a[0] != '\0') {
-		for (i = 0; b[i] != '\0'; i++)
-			if (b[i] == a[i]) 
+		for (i = 0; b[i] != '\0'; ++i) {
+			if (b[i] == a[i])
 				continue;
-			else if (a[i] < 97 && a[i] + 32 == b[i]) 
+			else if (a[i] < 97 && a[i] + 32 == b[i])
 				continue;
-			else if (b[i] < 97 && b[i] + 32 == a[i]) 
+			else if (b[i] < 97 && b[i] + 32 == a[i])
 				continue;
-			else 
+			else
 				break;
-		if (b[i] == '\0') return true;
+		}
+		if (b[i] == '\0')
+			return true;
 		a++;
 	}
 	return false;
